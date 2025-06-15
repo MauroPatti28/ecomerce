@@ -1,24 +1,54 @@
 import { useNavigate } from "react-router-dom";
 
-function carrito({carrito, setCarrito}) {
+function Carrito({ carrito, setCarrito }) {
     const navigate = useNavigate();
 
-    const handleRemoveItem = (id) => {
+    // Función para incrementar cantidad
+    const handleIncreaseItem = (id) => {
+        const nuevoCarrito = carrito.map(item => {
+            if (item._id === id) {
+                const nuevaCantidad = item.cantidad + 1;
+                return {
+                    ...item,
+                    cantidad: nuevaCantidad,
+                    precioTotal: parseFloat(item.precio) * nuevaCantidad
+                };
+            }
+            return item;
+        });
+        setCarrito(nuevoCarrito);
+    };
+
+    // Función para decrementar cantidad
+    const handleDecreaseItem = (id) => {
         const nuevoCarrito = carrito.reduce((acc, item) => {
-            if (item._id === id){
+            if (item._id === id) {
                 if (item.cantidad > 1) {
-                    acc.push({...item, cantidad: item.cantidad - 1});
+                    const nuevaCantidad = item.cantidad - 1;
+                    acc.push({
+                        ...item,
+                        cantidad: nuevaCantidad,
+                        precioTotal: parseFloat(item.precio) * nuevaCantidad
+                    });
                 }
             } else {
                 acc.push(item);
             }
-
             return acc;
         }, []);
         setCarrito(nuevoCarrito);
     };
 
-    const total = carrito.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
+    // Función para eliminar completamente un producto
+    const handleDeleteItem = (id) => {
+        const nuevoCarrito = carrito.filter(item => item._id !== id);
+        setCarrito(nuevoCarrito);
+    };
+
+    // Calcular el total del carrito
+    const total = carrito.reduce((acc, item) => {
+        return acc + (item.precioTotal || parseFloat(item.precio) * item.cantidad);
+    }, 0);
 
     return(
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4">
@@ -49,7 +79,7 @@ function carrito({carrito, setCarrito}) {
                                             <div className="relative overflow-hidden rounded-lg shadow-md">
                                                 <img 
                                                     src={`http://localhost:3000/uploads/${item.imagen}`} 
-                                                    alt={item.imagen} 
+                                                    alt={item.nombre} 
                                                     className="w-20 h-20 object-cover transition-transform duration-300 group-hover:scale-110"
                                                 />
                                                 <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300"></div>
@@ -57,31 +87,48 @@ function carrito({carrito, setCarrito}) {
 
                                             {/* Product Info */}
                                             <div className="flex-1">
-                                                <h3 className="text-lg font-semibold text-gray-800 mb-1">
+                                                <h3 className="text-lg font-semibold text-gray-800 mb-2">
                                                     {item.nombre}
-                                                    {item.cantidad > 1 && (
-                                                        <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-sm rounded-full font-medium">
-                                                            ×{item.cantidad}
-                                                        </span>
-                                                    )}
                                                 </h3>
+                                                
+                                                {/* Controles de cantidad */}
+                                                <div className="flex items-center space-x-4 mb-2">
+                                                    <span className="text-gray-600">Cantidad:</span>
+                                                    <div className="flex items-center border border-gray-300 rounded-lg">
+                                                        <button
+                                                            onClick={() => handleDecreaseItem(item._id)}
+                                                            className="px-3 py-1 hover:bg-gray-100 transition-colors text-sm"
+                                                            disabled={item.cantidad <= 1}
+                                                        >
+                                                            -
+                                                        </button>
+                                                        <span className="px-3 py-1 border-x border-gray-300 text-sm">{item.cantidad}</span>
+                                                        <button
+                                                            onClick={() => handleIncreaseItem(item._id)}
+                                                            className="px-3 py-1 hover:bg-gray-100 transition-colors text-sm"
+                                                        >
+                                                            +
+                                                        </button>
+                                                    </div>
+                                                </div>
+
                                                 <div className="flex items-center space-x-4">
                                                     <span className="text-gray-600">
-                                                        ${item.precio} c/u
+                                                        ${parseFloat(item.precio).toFixed(2)} c/u
                                                     </span>
                                                     <span className="text-lg font-bold text-green-600">
-                                                        ${(item.precio * item.cantidad).toFixed(2)}
+                                                        ${(item.precioTotal || parseFloat(item.precio) * item.cantidad).toFixed(2)}
                                                     </span>
                                                 </div>
                                             </div>
 
-                                            {/* Remove Button */}
+                                            {/* Delete Button */}
                                             <button 
                                                 className="bg-red-500 hover:bg-red-600 text-white w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg transition-all duration-200 transform hover:scale-110 shadow-lg hover:shadow-xl" 
-                                                onClick={() => handleRemoveItem(item._id)}
-                                                title="Eliminar producto"
+                                                onClick={() => handleDeleteItem(item._id)}
+                                                title="Eliminar producto completamente"
                                             >
-                                                ×
+                                                🗑️
                                             </button>
                                         </div>
                                     </div>
@@ -119,4 +166,4 @@ function carrito({carrito, setCarrito}) {
     )
 }
 
-export default carrito;
+export default Carrito;

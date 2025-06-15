@@ -77,22 +77,36 @@ function App() {
     };
 
     const agregarAlCarrito = (producto) => {
-        // Verificar si el usuario está logueado antes de agregar al carrito
-        if (!isAuthenticated || rol !== 'cliente') {
-            alert('Debes iniciar sesión como cliente para agregar productos al carrito');
-            return;
-        }
+    // Verificar si el usuario está logueado antes de agregar al carrito
+    if (!isAuthenticated || rol !== 'cliente') {
+        alert('Debes iniciar sesión como cliente para agregar productos al carrito');
+        return;
+    }
 
-        setCarrito((prevCarrito) => {
-            const productoExistente = prevCarrito.find(item => item._id === producto._id);
-            if (productoExistente) {
-                return prevCarrito.map(item =>
-                    item._id === producto._id ? { ...item, cantidad: item.cantidad + 1 } : item
-                );
-            } else {
-                return [...prevCarrito, { ...producto, cantidad: 1 }];
-            }
-        });
+    setCarrito((prevCarrito) => {
+        const productoExistente = prevCarrito.find(item => item._id === producto._id);
+        
+        if (productoExistente) {
+            // Sumar la nueva cantidad a la existente
+            const nuevaCantidad = productoExistente.cantidad + producto.cantidad;
+            return prevCarrito.map(item =>
+                item._id === producto._id 
+                    ? { 
+                        ...item, 
+                        cantidad: nuevaCantidad,
+                        precioTotal: parseFloat(item.precio) * nuevaCantidad
+                    } 
+                    : item
+            );
+        } else {
+            // Agregar nuevo producto con su cantidad y precio total
+            return [...prevCarrito, { 
+                ...producto, 
+                precioTotal: parseFloat(producto.precio) * producto.cantidad 
+            }];
+        }
+    });
+    
         alert(`Producto ${producto.nombre} agregado al carrito`);
     }
 
