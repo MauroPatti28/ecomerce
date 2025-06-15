@@ -38,7 +38,7 @@ function App() {
                 const response = await fetch("http://localhost:3000/productos", {
                     method: "GET",
                     headers: {
-                        Authorization: `Bearer ${token}`, 
+                        ...(token && { Authorization: `Bearer ${token}` }), 
                         "Content-Type": "application/json",
                     },
                 });
@@ -69,8 +69,6 @@ function App() {
     };
 
     const ProtectedRoute = ({ children, requiredRole }) => {
-        
-
         if (requiredRole && rol !== requiredRole) {
             return <Navigate to="/" replace />;
         }
@@ -79,6 +77,12 @@ function App() {
     };
 
     const agregarAlCarrito = (producto) => {
+        // Verificar si el usuario está logueado antes de agregar al carrito
+        if (!isAuthenticated || rol !== 'cliente') {
+            alert('Debes iniciar sesión como cliente para agregar productos al carrito');
+            return;
+        }
+
         setCarrito((prevCarrito) => {
             const productoExistente = prevCarrito.find(item => item._id === producto._id);
             if (productoExistente) {
@@ -105,31 +109,27 @@ function App() {
                     element={<Login setIsAuthenticated={setIsAuthenticated} setRol={setRol} />}
                 />
 
+                {/* Ahora los productos se pueden ver sin estar logueado */}
                 <Route 
-                    path=
-                    "/productos" 
-                    element={
-                        <ProtectedRoute requiredRole="cliente">
-                            <Productos  />
-                        </ProtectedRoute>
-                    }
+                    path="/productos" 
+                    element={<Productos isAuthenticated={isAuthenticated} rol={rol} />}
                 />
+                
                 <Route  
-                 
                    path='/admin/historial'
                     element={
                         <ProtectedRoute requiredRole="admin">
                             <OrdenHistorial />
                         </ProtectedRoute>
                     }
-                
                 />
+                
                 <Route
                     path="/carrito"    
-                    element= {
+                    element={
                         <ProtectedRoute requiredRole="cliente">
                             <Carrito carrito={carrito} setCarrito={setCarrito} />
-                        </ ProtectedRoute>
+                        </ProtectedRoute>
                     }
                 />
 
@@ -141,7 +141,8 @@ function App() {
                         </ProtectedRoute>
                     }
                 />
-                 <Route
+                
+                <Route
                     path='/success' element={<Resultado/>}
                 />
 
@@ -149,9 +150,17 @@ function App() {
                     path='/cancel'  element={<Resultado/>}
                 />
 
+                {/* ProductoDetalle también puede verse sin login, pero agregar al carrito requiere autenticación */}
                 <Route
-                path='/producto/:id'
-                element={<ProductoDetalle productos = {productos} agregarAlCarrito={agregarAlCarrito}/>}
+                    path='/producto/:id'
+                    element={
+                        <ProductoDetalle 
+                            productos={productos} 
+                            agregarAlCarrito={agregarAlCarrito}
+                            isAuthenticated={isAuthenticated}
+                            rol={rol}
+                        />
+                    }
                 />
 
                 <Route 

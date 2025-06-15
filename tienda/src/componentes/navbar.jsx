@@ -27,6 +27,11 @@ function NavBar({isAuthenticated, handleLogout, rol, carritoItems}) {
     };
 
     const handleCarritoClick = () => {
+        if (!isAuthenticated || rol !== 'cliente') {
+            alert('Debes iniciar sesión como cliente para acceder al carrito');
+            navigate('/login');
+            return;
+        }
         navigate("/carrito");
     };
 
@@ -73,27 +78,20 @@ function NavBar({isAuthenticated, handleLogout, rol, carritoItems}) {
                                 <div className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-gradient-to-r from-blue-400 to-purple-400 group-hover:w-full group-hover:left-0 transition-all duration-300"></div>
                             </Link>
 
-                            {isAuthenticated ? (
-                                <Link 
-                                    to="/productos" 
-                                    className="group relative px-4 py-2 text-white font-medium transition-all duration-300 hover:text-blue-300"
-                                >
-                                    <span className="relative z-10">Productos</span>
-                                    <div className="absolute inset-0 bg-gradient-to-r from-blue-600/0 via-blue-600/20 to-blue-600/0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                                    <div className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-gradient-to-r from-blue-400 to-purple-400 group-hover:w-full group-hover:left-0 transition-all duration-300"></div>
-                                </Link>
-                            ) : (
-                                <button 
-                                    onClick={() => alert("Debes Registrarte e Iniciar Sesión Para Ver Los Productos!")}
-                                    className="group relative px-4 py-2 text-white/70 font-medium transition-all duration-300 hover:text-red-300"
-                                >
-                                    <span className="relative z-10">Productos</span>
-                                    <div className="absolute inset-0 bg-gradient-to-r from-red-600/0 via-red-600/20 to-red-600/0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                                    <svg className="inline w-4 h-4 ml-1 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                                    </svg>
-                                </button>
-                            )}
+                            {/* Productos - Ahora accesible para todos */}
+                            <Link 
+                                to="/productos" 
+                                className="group relative px-4 py-2 text-white font-medium transition-all duration-300 hover:text-blue-300"
+                            >
+                                <span className="relative z-10">Productos</span>
+                                <div className="absolute inset-0 bg-gradient-to-r from-blue-600/0 via-blue-600/20 to-blue-600/0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                <div className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-gradient-to-r from-blue-400 to-purple-400 group-hover:w-full group-hover:left-0 transition-all duration-300"></div>
+                                {!isAuthenticated && (
+                                    <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs px-1.5 py-0.5 rounded-full font-semibold">
+                                        Libre
+                                    </span>
+                                )}
+                            </Link>
 
                             <Link 
                                 to="/registro" 
@@ -104,6 +102,18 @@ function NavBar({isAuthenticated, handleLogout, rol, carritoItems}) {
                                 <div className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-gradient-to-r from-blue-400 to-purple-400 group-hover:w-full group-hover:left-0 transition-all duration-300"></div>
                             </Link>
 
+                            {/* Admin Panel - Solo para admins */}
+                            {isAuthenticated && rol === 'admin' && (
+                                <Link 
+                                    to="/admin" 
+                                    className="group relative px-4 py-2 text-yellow-300 font-medium transition-all duration-300 hover:text-yellow-200"
+                                >
+                                    <span className="relative z-10">Admin</span>
+                                    <div className="absolute inset-0 bg-gradient-to-r from-yellow-600/0 via-yellow-600/20 to-yellow-600/0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                    <div className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-gradient-to-r from-yellow-400 to-orange-400 group-hover:w-full group-hover:left-0 transition-all duration-300"></div>
+                                </Link>
+                            )}
+
                             {!isAuthenticated ? (
                                 <Link 
                                     to="/login"
@@ -112,12 +122,17 @@ function NavBar({isAuthenticated, handleLogout, rol, carritoItems}) {
                                     Iniciar Sesión
                                 </Link>
                             ) : (
-                                <button
-                                    onClick={handleLogoutAndRedirect}
-                                    className="bg-gradient-to-r from-red-600 to-red-700 text-white px-6 py-2.5 rounded-full font-semibold hover:from-red-700 hover:to-red-800 focus:ring-4 focus:ring-red-300 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                                >
-                                    Cerrar Sesión
-                                </button>
+                                <div className="flex items-center space-x-2">
+                                    <span className="text-green-400 text-sm font-medium">
+                                        👋 Hola, {localStorage.getItem('nombre') || 'Usuario'}
+                                    </span>
+                                    <button
+                                        onClick={handleLogoutAndRedirect}
+                                        className="bg-gradient-to-r from-red-600 to-red-700 text-white px-4 py-2 rounded-full font-medium hover:from-red-700 hover:to-red-800 focus:ring-4 focus:ring-red-300 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-sm"
+                                    >
+                                        Cerrar Sesión
+                                    </button>
+                                </div>
                             )}
                         </div>
 
@@ -127,6 +142,7 @@ function NavBar({isAuthenticated, handleLogout, rol, carritoItems}) {
                             <button 
                                 onClick={handleCarritoClick}
                                 className="relative group p-3 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-xl hover:from-blue-600/30 hover:to-purple-600/30 transition-all duration-300 border border-blue-500/30 hover:border-blue-400/50"
+                                title={isAuthenticated && rol === 'cliente' ? 'Ver carrito' : 'Inicia sesión para acceder al carrito'}
                             >
                                 <img 
                                     src={carrito} 
@@ -137,6 +153,9 @@ function NavBar({isAuthenticated, handleLogout, rol, carritoItems}) {
                                     <span className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center animate-pulse shadow-lg">
                                         {carritoItems.length}
                                     </span>
+                                )}
+                                {!isAuthenticated && (
+                                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
                                 )}
                                 <div className="absolute inset-0 bg-gradient-to-r from-blue-400/0 to-purple-400/0 group-hover:from-blue-400/10 group-hover:to-purple-400/10 rounded-xl transition-all duration-300"></div>
                             </button>
@@ -169,25 +188,14 @@ function NavBar({isAuthenticated, handleLogout, rol, carritoItems}) {
                             🏠 Inicio
                         </Link>
 
-                        {isAuthenticated ? (
-                            <Link 
-                                to="/productos" 
-                                className="block px-4 py-3 text-white font-medium hover:bg-blue-800/30 rounded-lg transition-colors duration-300"
-                                onClick={() => setIsMobileMenuOpen(false)}
-                            >
-                                📦 Productos
-                            </Link>
-                        ) : (
-                            <button 
-                                onClick={() => {
-                                    alert("Debes Registrarte e Iniciar Sesión Para Ver Los Productos!");
-                                    setIsMobileMenuOpen(false);
-                                }}
-                                className="block w-full text-left px-4 py-3 text-white/70 font-medium hover:bg-red-800/30 rounded-lg transition-colors duration-300"
-                            >
-                                🔒 Productos (Requiere login)
-                            </button>
-                        )}
+                        {/* Productos - Accesible para todos en móvil también */}
+                        <Link 
+                            to="/productos" 
+                            className="block px-4 py-3 text-white font-medium hover:bg-blue-800/30 rounded-lg transition-colors duration-300"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                            📦 Productos {!isAuthenticated && <span className="text-orange-400 text-sm">(Ver disponible)</span>}
+                        </Link>
 
                         <Link 
                             to="/registro" 
@@ -196,6 +204,17 @@ function NavBar({isAuthenticated, handleLogout, rol, carritoItems}) {
                         >
                             📝 Registrarse
                         </Link>
+
+                        {/* Admin Panel para móvil */}
+                        {isAuthenticated && rol === 'admin' && (
+                            <Link 
+                                to="/admin" 
+                                className="block px-4 py-3 text-yellow-300 font-medium hover:bg-yellow-800/30 rounded-lg transition-colors duration-300"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                                ⚙️ Panel Admin
+                            </Link>
+                        )}
 
                         {!isAuthenticated ? (
                             <Link 
@@ -206,15 +225,20 @@ function NavBar({isAuthenticated, handleLogout, rol, carritoItems}) {
                                 🚀 Iniciar Sesión
                             </Link>
                         ) : (
-                            <button
-                                onClick={() => {
-                                    handleLogoutAndRedirect();
-                                    setIsMobileMenuOpen(false);
-                                }}
-                                className="block w-full px-4 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold rounded-lg hover:from-red-700 hover:to-red-800 transition-all duration-300 text-center"
-                            >
-                                🚪 Cerrar Sesión
-                            </button>
+                            <div className="space-y-2">
+                                <div className="px-4 py-2 text-green-400 text-sm font-medium">
+                                    👋 Hola, {localStorage.getItem('nombre') || 'Usuario'}
+                                </div>
+                                <button
+                                    onClick={() => {
+                                        handleLogoutAndRedirect();
+                                        setIsMobileMenuOpen(false);
+                                    }}
+                                    className="block w-full px-4 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold rounded-lg hover:from-red-700 hover:to-red-800 transition-all duration-300 text-center"
+                                >
+                                    🚪 Cerrar Sesión
+                                </button>
+                            </div>
                         )}
                     </div>
                 </div>

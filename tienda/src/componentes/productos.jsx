@@ -1,20 +1,34 @@
 import React from 'react';
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom"; // ✅ Agregar esta importación
-import { ShoppingBag, Eye, AlertCircle, Loader2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { ShoppingBag, Eye, AlertCircle, Loader2, LogIn } from "lucide-react";
 
-function Productos() {
+function Productos({ isAuthenticated, rol }) {
     const [productos, setProductos] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const navigate = useNavigate(); // ✅ Agregar el hook de navegación
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchProductos = async () => {
             try {
                 setLoading(true);
                 setError(null);
-                const response = await fetch("http://localhost:3000/productos");
+                
+                // Solo incluir token si el usuario está autenticado
+                const token = localStorage.getItem("token");
+                const headers = {
+                    "Content-Type": "application/json",
+                };
+                
+                if (token) {
+                    headers.Authorization = `Bearer ${token}`;
+                }
+                
+                const response = await fetch("http://localhost:3000/productos", {
+                    method: "GET",
+                    headers: headers,
+                });
                 
                 if (!response.ok) {
                     throw new Error(`Error ${response.status}: ${response.statusText}`);
@@ -34,8 +48,11 @@ function Productos() {
 
     const handleProductClick = (productId) => {
         console.log(`Navegando a producto: ${productId}`);
-        // ✅ Cambiar esto por navegación real
         navigate(`/producto/${productId}`);
+    };
+
+    const handleLoginRedirect = () => {
+        navigate('/login');
     };
 
     // Estado de carga
@@ -76,16 +93,28 @@ function Productos() {
             {/* Header */}
             <div className="bg-white shadow-sm border-b border-gray-100">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                    <div className="flex items-center space-x-4">
-                        <div className="bg-blue-100 p-3 rounded-xl">
-                            <ShoppingBag className="w-8 h-8 text-blue-600" />
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                            <div className="bg-blue-100 p-3 rounded-xl">
+                                <ShoppingBag className="w-8 h-8 text-blue-600" />
+                            </div>
+                            <div>
+                                <h1 className="text-3xl font-bold text-gray-900">Nuestros Productos</h1>
+                                <p className="text-gray-600 mt-1">
+                                    Descubre nuestra colección de productos premium
+                                </p>
+                            </div>
                         </div>
-                        <div>
-                            <h1 className="text-3xl font-bold text-gray-900">Nuestros Productos</h1>
-                            <p className="text-gray-600 mt-1">
-                                Descubre nuestra colección de productos premium
-                            </p>
-                        </div>
+                        
+                        {/* Indicador de estado de login */}
+                        {!isAuthenticated && (
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                                <p className="text-blue-700 text-sm">
+                                    <LogIn className="w-4 h-4 inline mr-1" />
+                                    Inicia sesión para agregar al carrito
+                                </p>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
@@ -144,14 +173,34 @@ function Productos() {
                                             </p>
                                         )}
 
-                                        {/* Botón de acción */}
-                                        <button
-                                            onClick={() => handleProductClick(producto._id)}
-                                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2 group/btn"
-                                        >
-                                            <Eye className="w-4 h-4 group-hover/btn:rotate-12 transition-transform duration-200" />
-                                            <span>Ver detalles</span>
-                                        </button>
+                                        {/* Descripción corta si está disponible */}
+                                        {producto.descripcion && (
+                                            <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                                                {producto.descripcion}
+                                            </p>
+                                        )}
+
+                                        {/* Botones de acción */}
+                                        <div className="space-y-2">
+                                            <button
+                                                onClick={() => handleProductClick(producto._id)}
+                                                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2 group/btn"
+                                            >
+                                                <Eye className="w-4 h-4 group-hover/btn:rotate-12 transition-transform duration-200" />
+                                                <span>Ver detalles</span>
+                                            </button>
+                                            
+                                            {/* Botón de login si no está autenticado */}
+                                            {!isAuthenticated && (
+                                                <button
+                                                    onClick={handleLoginRedirect}
+                                                    className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2 text-sm"
+                                                >
+                                                    <LogIn className="w-4 h-4" />
+                                                    <span>Inicia sesión para comprar</span>
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             ))}
