@@ -23,7 +23,7 @@ function Pago({ carrito }) {
 
     const crearSesionPago = async () => {
       try {
-        const response = await fetch("http://localhost:3000/usuarios/pago", {
+        const response = await fetch("https://ecomerce-production-c031.up.railway.app/usuarios/pago", {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,

@@ -21,7 +21,7 @@ const AdminPanel = () => {
 
   const fetchProductos = async () => {
     try {
-      const res = await fetch("http://localhost:3000/productos");
+      const res = await fetch("https://ecomerce-production-c031.up.railway.app/productos");
       const data = await res.json();
       setProductos(data || []);
     } catch (error) {
@@ -76,8 +76,8 @@ const AdminPanel = () => {
     }
 
     const url = modoEdicion
-      ? `http://localhost:3000/productos/editar/${idEditando}`
-      : "http://localhost:3000/productos";
+      ? `https://ecomerce-production-c031.up.railway.app/productos/editar/${idEditando}`
+      : "https://ecomerce-production-c031.up.railway.app/productos";
     const method = modoEdicion ? "PUT" : "POST";
 
     const token = localStorage.getItem("token");
@@ -124,7 +124,7 @@ const AdminPanel = () => {
     if (window.confirm("¿Estás seguro de eliminar este producto?")) {
       const token = localStorage.getItem("token");
       try {
-        const res = await fetch(`http://localhost:3000/productos/${id}`, {
+        const res = await fetch(`https://ecomerce-production-c031.up.railway.app/productos/${id}`, {
           method: "DELETE",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -215,7 +215,7 @@ const AdminPanel = () => {
                   <p className="text-sm font-medium text-gray-700 mb-3">Imagen Actual:</p>
                   <div className="flex justify-center mb-3">
                     <img
-                      src={`http://localhost:3000/uploads/${imagenActual}`}
+                      src={`https://ecomerce-production-c031.up.railway.app/uploads/${imagenActual}`}
                       alt="Imagen actual"
                       className="w-24 h-24 object-cover rounded-xl shadow-md"
                     />
@@ -314,7 +314,7 @@ const AdminPanel = () => {
                         {p.imagen && (
                           <div className="mb-4">
                             <img
-                              src={`http://localhost:3000/uploads/${p.imagen}`}
+                              src={`https://ecomerce-production-c031.up.railway.app/uploads/${p.imagen}`}
                               alt={p.nombre}
                               className="w-20 h-20 object-cover rounded-xl shadow-md border-2 border-gray-200"
                             />

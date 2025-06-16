@@ -8,7 +8,6 @@ function Registro() {
         email: '',
         password: ''
     });
-    const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
 
@@ -22,12 +21,8 @@ function Registro() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true);
-        
         try {
-            console.log('📤 Enviando datos:', formData);
-            
-            const response = await fetch("http://localhost:3000/usuarios/register", {
+            const response = await fetch("https://ecomerce-production-c031.up.railway.app/usuarios/register", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -35,26 +30,17 @@ function Registro() {
                 body: JSON.stringify(formData)
             });
 
-            console.log('📡 Status de respuesta:', response.status);
-            console.log('📡 Headers de respuesta:', Object.fromEntries(response.headers));
-
-            const data = await response.json();
-            console.log('📥 Datos recibidos:', data);
-
             if (response.ok) {
+                const data = await response.json();
                 alert("Usuario registrado con éxito");
+                console.log(data);
                 navigate("/login");
             } else {
-                // Mostrar el error específico del servidor
-                const errorMessage = data.error || data.message || "Error desconocido";
-                alert(`Error: ${errorMessage}`);
-                console.error('❌ Error del servidor:', data);
+                alert("Error al registrar el usuario");
             }
         } catch (error) {
-            console.error("❌ Error de red/conexión:", error);
-            alert(`Error de conexión: ${error.message}`);
-        } finally {
-            setLoading(false);
+            console.error("Error:", error);
+            alert("Error al registrar el usuario");
         }
     };
 
@@ -75,8 +61,6 @@ function Registro() {
                         value={formData.nombre}
                         onChange={handleChange}
                         required 
-                        minLength={2}
-                        maxLength={50}
                         className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 outline-none text-gray-700 placeholder-gray-400"
                     />
 
@@ -87,7 +71,7 @@ function Registro() {
                         placeholder="Apellido" 
                         value={formData.apellido}
                         onChange={handleChange}
-                        maxLength={50}
+                        required 
                         className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 outline-none text-gray-700 placeholder-gray-400"
                     />
 
@@ -106,25 +90,19 @@ function Registro() {
                         type="password" 
                         id="password" 
                         name="password" 
-                        placeholder="Contraseña (mín. 6 caracteres)" 
+                        placeholder="Contraseña" 
                         value={formData.password}
                         onChange={handleChange}
                         required 
-                        minLength={6}
                         className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 outline-none text-gray-700 placeholder-gray-400"
                     />
                 </div>
 
                 <button 
                     type="submit"
-                    disabled={loading}
-                    className={`w-full py-3 font-semibold rounded-lg transform transition-all duration-200 shadow-lg focus:ring-4 focus:ring-blue-200 outline-none ${
-                        loading 
-                            ? 'bg-gray-400 cursor-not-allowed' 
-                            : 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700 hover:scale-105 hover:shadow-xl'
-                    }`}
+                    className="w-full py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-600 hover:to-indigo-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl focus:ring-4 focus:ring-blue-200 outline-none"
                 >
-                    {loading ? 'Registrando...' : 'Registrarse'}
+                    Registrarse
                 </button>
 
                 <div className="text-center space-y-3">

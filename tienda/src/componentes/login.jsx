@@ -25,7 +25,7 @@ function Login({ setIsAuthenticated, setRol, handleOpenModal }) {
     try {
       console.log('🔐 Intentando login con:', { email: formData.email, password: '***' });
       
-      const response = await fetch("http://localhost:3000/usuarios/login", {
+      const response = await fetch("https://ecomerce-production-c031.up.railway.app/usuarios/login", {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
