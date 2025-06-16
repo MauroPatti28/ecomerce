@@ -12,7 +12,7 @@ const { stripeWebhook } = require("./controllers/webhook.js");
 const resenasRoutes = require("./routes/reseñasRoutes.js");
 // 👉 Importar el modelo User para crear admin
 const User = require("./models/user.js"); // Asegúrate de que la ruta sea correcta
-
+const mongoUri = process.env.MONGODB_URI
 const server = express();
 
 // ✅ Webhook: usar bodyParser.raw ANTES de express.json()
@@ -73,14 +73,20 @@ async function verificarPasswordAdmin(passwordIngresada, passwordHasheada) {
 }
 
 // Conexión Mongo con creación de admin
-mongoose.connect("mongodb://localhost:27017/tienda2")
-  .then(async () => {
-    console.log("✅ Conectado a MongoDB");
-    // 👉 Crear admin después de conectar a la base de datos
+mongoose.connect(mongoUri, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 5000,  // Tiempo de espera para conexión
+    socketTimeoutMS: 45000,         // Tiempo de espera para operaciones
+})
+.then(async () => {
+    console.log("✅ Conectado a MongoDB Atlas");
     await crearAdminPorDefecto();
-  })
-  .catch((err) => console.error("❌ Error de conexión:", err));
-
+})
+.catch((err) => {
+    console.error("❌ Error de conexión a MongoDB:", err);
+    process.exit(1);  // Salir de la aplicación si no hay conexión
+});
 server.listen(3000, () => {
   console.log("🚀 Servidor en http://localhost:3000");
 });

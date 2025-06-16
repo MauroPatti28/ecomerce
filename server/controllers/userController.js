@@ -25,7 +25,8 @@ exports.Register = async(req,res)=>{
     try{
        
         const {nombre,apellido,email,password,rol} = req.body
-        const nuevoU = await new User({nombre,apellido,email,password,  rol: rol || "cliente"})
+        const password2 =  await bcrypt.hash(password,10)
+        const nuevoU = await new User({nombre,apellido,email,password:password2,  rol: rol || "cliente"})
         nuevoU.save()
         res.status(201).json({ message: "Usuario registrado con éxito" });
 

@@ -6,6 +6,7 @@ function Login({ setIsAuthenticated, setRol, handleOpenModal }) {
     email: '',
     password: ''
   });
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
@@ -19,7 +20,11 @@ function Login({ setIsAuthenticated, setRol, handleOpenModal }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    
     try {
+      console.log('🔐 Intentando login con:', { email: formData.email, password: '***' });
+      
       const response = await fetch("http://localhost:3000/usuarios/login", {
         method: 'POST',
         headers: {
@@ -28,9 +33,21 @@ function Login({ setIsAuthenticated, setRol, handleOpenModal }) {
         body: JSON.stringify(formData)
       });
 
+      console.log('📡 Status de respuesta login:', response.status);
+      
+      const data = await response.json();
+      console.log('📥 Respuesta del servidor:', data);
+
       if (response.ok) {
-        const data = await response.json();
+        console.log('✅ Login exitoso');
         alert("Inicio de sesión exitoso");
+
+        // Verificar que los datos necesarios estén presentes
+        if (!data.token || !data.user) {
+          console.error('❌ Respuesta incompleta del servidor:', data);
+          alert("Error: Respuesta del servidor incompleta");
+          return;
+        }
 
         setIsAuthenticated(true);
         setRol(data.user.rol);
@@ -41,17 +58,40 @@ function Login({ setIsAuthenticated, setRol, handleOpenModal }) {
         localStorage.setItem("nombre", data.user.nombre);
         localStorage.setItem("rol", data.user.rol);
 
+        console.log('💾 Datos guardados en localStorage:', {
+          userId: data.user.id,
+          nombre: data.user.nombre,
+          rol: data.user.rol
+        });
+
+        // Navegar según el rol
         if (data.user.rol === "admin") {
+          console.log('🔑 Redirigiendo a panel admin');
           navigate("/admin");
         } else if (data.user.rol === "cliente") {
+          console.log('🛍️ Redirigiendo a productos');
           navigate("/productos");
+        } else {
+          console.log('❓ Rol desconocido:', data.user.rol);
         }
       } else {
-        alert("Error al iniciar sesión, alguna de las credenciales es incorrecta");
+        // Manejar errores específicos del servidor
+        const errorMessage = data.message || data.error || "Error desconocido";
+        console.error('❌ Error de login:', errorMessage);
+        
+        if (response.status === 404) {
+          alert("Usuario no encontrado");
+        } else if (response.status === 401) {
+          alert("Contraseña incorrecta");
+        } else {
+          alert(`Error: ${errorMessage}`);
+        }
       }
     } catch (error) {
-      console.error("Error:", error);
-      alert("Error al iniciar sesión");
+      console.error("❌ Error de conexión:", error);
+      alert(`Error de conexión: ${error.message}`);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -73,7 +113,8 @@ function Login({ setIsAuthenticated, setRol, handleOpenModal }) {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200 outline-none text-gray-700 placeholder-gray-400 peer"
+                disabled={loading}
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200 outline-none text-gray-700 placeholder-gray-400 peer disabled:bg-gray-100 disabled:cursor-not-allowed"
               />
               <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                 <svg className="w-5 h-5 text-gray-400 peer-focus:text-indigo-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -90,7 +131,8 @@ function Login({ setIsAuthenticated, setRol, handleOpenModal }) {
                 value={formData.password}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200 outline-none text-gray-700 placeholder-gray-400 peer"
+                disabled={loading}
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200 outline-none text-gray-700 placeholder-gray-400 peer disabled:bg-gray-100 disabled:cursor-not-allowed"
               />
               <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                 <svg className="w-5 h-5 text-gray-400 peer-focus:text-indigo-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -102,9 +144,21 @@ function Login({ setIsAuthenticated, setRol, handleOpenModal }) {
 
           <button 
             type="submit"
-            className="w-full py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold rounded-lg hover:from-indigo-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl focus:ring-4 focus:ring-indigo-200 outline-none"
+            disabled={loading}
+            className={`w-full py-3 font-semibold rounded-lg transform transition-all duration-200 shadow-lg focus:ring-4 focus:ring-indigo-200 outline-none ${
+              loading 
+                ? 'bg-gray-400 cursor-not-allowed' 
+                : 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700 hover:scale-105 hover:shadow-xl'
+            }`}
           >
-            Iniciar Sesión
+            {loading ? (
+              <div className="flex items-center justify-center">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                Iniciando sesión...
+              </div>
+            ) : (
+              'Iniciar Sesión'
+            )}
           </button>
 
           <div className="text-center">
@@ -129,6 +183,16 @@ function Login({ setIsAuthenticated, setRol, handleOpenModal }) {
             </a>
           </div>
         </form>
+
+        {/* Panel de debugging - solo en desarrollo */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="mt-4 p-2 bg-gray-100 rounded text-xs">
+            <p><strong>Debug Info:</strong></p>
+            <p>Email: {formData.email}</p>
+            <p>Password length: {formData.password.length}</p>
+            <p>Loading: {loading.toString()}</p>
+          </div>
+        )}
       </div>
     </div>
   );
