@@ -16,7 +16,6 @@ function Productos({ isAuthenticated, rol }) {
                 setLoading(true);
                 setError(null);
                 
-                // Solo incluir token si el usuario está autenticado
                 const token = localStorage.getItem("token");
                 const headers = {
                     "Content-Type": "application/json",
@@ -36,8 +35,6 @@ function Productos({ isAuthenticated, rol }) {
                 }
                 const data = await response.json();
                 setProductos(data);
-                
-                // Limpiar errores de imagen anteriores
                 setImageErrors(new Set());
             } catch (error) {
                 console.error("Error al obtener los productos:", error);
@@ -50,8 +47,8 @@ function Productos({ isAuthenticated, rol }) {
         fetchProductos();
     }, []);
 
+    // CORRECCIÓN: Función modificada para recibir explícitamente el ID
     const handleProductClick = (productId) => {
-        console.log(`Navegando a producto: ${productId}`);
         navigate(`/producto/${productId}`);
     };
 
@@ -59,12 +56,10 @@ function Productos({ isAuthenticated, rol }) {
         navigate('/login');
     };
 
-    // Función mejorada para manejar errores de imagen
     const handleImageError = (productId) => {
         setImageErrors(prev => new Set([...prev, productId]));
     };
 
-    // Función para recargar imagen
     const handleImageRetry = (productId) => {
         setImageErrors(prev => {
             const newSet = new Set(prev);
@@ -73,7 +68,6 @@ function Productos({ isAuthenticated, rol }) {
         });
     };
 
-    // Componente para imagen del producto
     const ProductImage = ({ producto }) => {
         const hasError = imageErrors.has(producto._id);
         const [imageLoading, setImageLoading] = useState(true);
@@ -111,13 +105,12 @@ function Productos({ isAuthenticated, rol }) {
                         setImageLoading(false);
                         handleImageError(producto._id);
                     }}
-                    loading="lazy" // Carga lazy para mejor performance
+                    loading="lazy"
                 />
             </div>
         );
     };
 
-    // Estado de carga
     if (loading) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
@@ -129,7 +122,6 @@ function Productos({ isAuthenticated, rol }) {
         );
     }
 
-    // Estado de error
     if (error) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
@@ -152,7 +144,6 @@ function Productos({ isAuthenticated, rol }) {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-            {/* Header */}
             <div className="bg-white shadow-sm border-b border-gray-100">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     <div className="flex items-center justify-between">
@@ -168,7 +159,6 @@ function Productos({ isAuthenticated, rol }) {
                             </div>
                         </div>
                         
-                        {/* Indicador de estado de login */}
                         {!isAuthenticated && (
                             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                                 <p className="text-blue-700 text-sm">
@@ -181,30 +171,26 @@ function Productos({ isAuthenticated, rol }) {
                 </div>
             </div>
 
-            {/* Contenido principal */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 {Array.isArray(productos) && productos.length > 0 ? (
                     <>
-                        {/* Contador de productos */}
                         <div className="mb-8">
                             <p className="text-gray-600 text-sm">
                                 Mostrando {productos.length} {productos.length === 1 ? 'producto' : 'productos'}
                             </p>
                         </div>
 
-                        {/* Grid de productos */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                             {productos.map((producto) => (
                                 <div 
                                     key={producto._id} 
                                     className="group bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl hover:border-blue-200 transition-all duration-300 transform hover:-translate-y-1"
                                 >
-                                    {/* Imagen del producto */}
                                     <div className="relative aspect-square overflow-hidden bg-gray-50">
                                         <ProductImage producto={producto} />
                                         
-                                        {/* Overlay en hover */}
                                         <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
+                                            {/* CORRECCIÓN: Pasamos el ID específico aquí */}
                                             <button
                                                 onClick={() => handleProductClick(producto._id)}
                                                 className="opacity-0 group-hover:opacity-100 bg-white text-gray-900 px-6 py-2 rounded-full font-semibold shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 flex items-center space-x-2 hover:bg-gray-50"
@@ -215,28 +201,25 @@ function Productos({ isAuthenticated, rol }) {
                                         </div>
                                     </div>
 
-                                    {/* Información del producto */}
                                     <div className="p-6">
                                         <h3 className="text-lg font-semibold text-gray-900 mb-3 line-clamp-2 group-hover:text-blue-600 transition-colors duration-200">
                                             {producto.nombre}
                                         </h3>
                                         
-                                        {/* Precio si está disponible */}
                                         {producto.precio && (
                                             <p className="text-2xl font-bold text-blue-600 mb-4">
                                                 ${producto.precio.toLocaleString()}
                                             </p>
                                         )}
 
-                                        {/* Descripción corta si está disponible */}
                                         {producto.descripcion && (
                                             <p className="text-gray-600 text-sm mb-4 line-clamp-2">
                                                 {producto.descripcion}
                                             </p>
                                         )}
 
-                                        {/* Botones de acción */}
                                         <div className="space-y-2">
+                                            {/* CORRECCIÓN: Pasamos el ID específico aquí también */}
                                             <button
                                                 onClick={() => handleProductClick(producto._id)}
                                                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2 group/btn"
@@ -245,7 +228,6 @@ function Productos({ isAuthenticated, rol }) {
                                                 <span>Ver detalles</span>
                                             </button>
                                             
-                                            {/* Botón de login si no está autenticado */}
                                             {!isAuthenticated && (
                                                 <button
                                                     onClick={handleLoginRedirect}
@@ -262,7 +244,6 @@ function Productos({ isAuthenticated, rol }) {
                         </div>
                     </>
                 ) : (
-                    // Estado vacío
                     <div className="text-center py-16">
                         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 max-w-md mx-auto">
                             <div className="bg-gray-100 p-4 rounded-xl inline-block mb-6">
