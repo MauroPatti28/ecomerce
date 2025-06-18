@@ -3,6 +3,9 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ShoppingBag, Eye, AlertCircle, Loader2, LogIn, ImageOff } from "lucide-react";
 
+// Versión de caché para imágenes (actualizar cuando se cambien imágenes existentes)
+const IMAGE_CACHE_VERSION = "v2";
+
 function Productos({ isAuthenticated, rol }) {
     const [productos, setProductos] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -47,7 +50,6 @@ function Productos({ isAuthenticated, rol }) {
         fetchProductos();
     }, []);
 
-    // CORRECCIÓN: Función modificada para recibir explícitamente el ID
     const handleProductClick = (productId) => {
         navigate(`/producto/${productId}`);
     };
@@ -71,6 +73,10 @@ function Productos({ isAuthenticated, rol }) {
     const ProductImage = ({ producto }) => {
         const hasError = imageErrors.has(producto._id);
         const [imageLoading, setImageLoading] = useState(true);
+        const [retryCount, setRetryCount] = useState(0); // Contador para reintentos
+        
+        // URL con parámetro de versión para evitar caché
+        const imageUrl = `https://ecomerce-production-c031.up.railway.app/uploads/${producto.imagen}?v=${IMAGE_CACHE_VERSION}`;
 
         if (hasError) {
             return (
@@ -78,7 +84,10 @@ function Productos({ isAuthenticated, rol }) {
                     <ImageOff className="w-12 h-12 text-gray-400 mb-2" />
                     <p className="text-gray-500 text-sm mb-2">Error al cargar imagen</p>
                     <button
-                        onClick={() => handleImageRetry(producto._id)}
+                        onClick={() => {
+                            handleImageRetry(producto._id);
+                            setRetryCount(prev => prev + 1); // Incrementar contador al reintentar
+                        }}
                         className="text-blue-600 hover:text-blue-700 text-xs underline"
                     >
                         Reintentar
@@ -95,7 +104,7 @@ function Productos({ isAuthenticated, rol }) {
                     </div>
                 )}
                 <img 
-                    src={`https://ecomerce-production-c031.up.railway.app/uploads/${producto.imagen}`}
+                    src={imageUrl}
                     alt={producto.nombre}
                     className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 ${
                         imageLoading ? 'opacity-0' : 'opacity-100'
@@ -106,6 +115,7 @@ function Productos({ isAuthenticated, rol }) {
                         handleImageError(producto._id);
                     }}
                     loading="lazy"
+                    key={`${producto._id}-${retryCount}`} // Clave única para forzar recarga
                 />
             </div>
         );
@@ -190,7 +200,6 @@ function Productos({ isAuthenticated, rol }) {
                                         <ProductImage producto={producto} />
                                         
                                         <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
-                                            {/* CORRECCIÓN: Pasamos el ID específico aquí */}
                                             <button
                                                 onClick={() => handleProductClick(producto._id)}
                                                 className="opacity-0 group-hover:opacity-100 bg-white text-gray-900 px-6 py-2 rounded-full font-semibold shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 flex items-center space-x-2 hover:bg-gray-50"
@@ -219,7 +228,6 @@ function Productos({ isAuthenticated, rol }) {
                                         )}
 
                                         <div className="space-y-2">
-                                            {/* CORRECCIÓN: Pasamos el ID específico aquí también */}
                                             <button
                                                 onClick={() => handleProductClick(producto._id)}
                                                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2 group/btn"
