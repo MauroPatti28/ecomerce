@@ -93,8 +93,8 @@ exports.pago = async (req, res) => {
         quantity: item.cantidad,
       })),
       mode: "payment",
-      success_url: "https://ecomerce-frontend-mauro.vercel.app/success?status=success&session_id={CHECKOUT_SESSION_ID}",
-      cancel_url: "https://ecomerce-frontend-mauro.vercel.app/cancel?status=cancel",
+      success_url: "https://ecomerce-ruddy-eta.vercel.app/success?status=success&session_id={CHECKOUT_SESSION_ID}",
+      cancel_url: "https://ecomerce-ruddy-eta.vercel.app/cancel?status=cancel",
       customer_email: req.user?.email || undefined,
       metadata: {
         userId: req.userId,
