@@ -70,3 +70,16 @@ exports.delete = async (req, res) => {
     res.status(500).json({ error: "Error al eliminar el producto" });
   }
 };
+exports.getById = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const productoIndividual = await producto.findById(id);
+    if (!productoIndividual) {
+      return res.status(404).json({ error: "Producto no encontrado" });
+    }
+    res.status(200).json(productoIndividual);
+  } catch (err) {
+    console.error("Error al obtener producto por id:", err);
+    res.status(500).json({ error: "Error al obtener producto" });
+  }
+};

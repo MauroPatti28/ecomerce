@@ -17,7 +17,9 @@ router.delete("/:id", authMiddleware, productController.delete);
 module.exports = router;
 
 router.post("/",upload.single('imagen'),productController.Post)
+router.get("/:id",productController.getById)
 router.get("/",productController.get)
+
 router.put("/editar/:id",productController.put)
 router.delete("/:id",productController.delete)
 router.get("/:productoId/resenas", resenasController.obtenerResenas);
