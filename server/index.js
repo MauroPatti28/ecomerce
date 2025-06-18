@@ -19,8 +19,11 @@ const server = express();
 server.post("/webhook", bodyParser.raw({ type: "application/json" }), stripeWebhook);
 
 // Luego los demás middlewares
-server.use(cors());
-server.use(express.json());
+server.use(cors({
+  origin: ['https://ecomerce-ruddy-eta.vercel.app/'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));server.use(express.json());
 server.use("/uploads", express.static("uploads"));
 server.use("/usuarios", userRoutes);
 server.use("/productos", productRoutes);
