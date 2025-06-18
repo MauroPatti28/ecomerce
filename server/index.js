@@ -27,22 +27,6 @@ server.use("/productos", productRoutes);
 server.use("/ordenes", ordenRoutes);
 server.use("/resenas", resenasRoutes); 
 
-const uploadsDir = path.join(__dirname, 'uploads');
-
-// Crear directorio si no existe
-if (!fs.existsSync(uploadsDir)) {
-    fs.mkdirSync(uploadsDir, { recursive: true });
-}
-
-// Servir imágenes con headers optimizados
-server.use('/uploads', (req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Cache-Control', 'public, max-age=86400'); // 24h cache
-    next();
-}, express.static(uploadsDir));
-
-
-
 // 👉 Función para crear admin por defecto con contraseña encriptada
 async function crearAdminPorDefecto() {
   try {
