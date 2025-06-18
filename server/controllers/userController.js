@@ -86,20 +86,20 @@ exports.pago = async (req, res) => {
         price_data: {
           currency: "usd",
           product_data: {
-            name: item.nombre, // nombre del producto
+            name: item.nombre,
           },
-          unit_amount: item.precio * 100, // en centavos
+          unit_amount: item.precio * 100,
         },
         quantity: item.cantidad,
       })),
       mode: "payment",
-      success_url: "http://localhost:5173/success?status=success&session_id={CHECKOUT_SESSION_ID}",
-      cancel_url: "http://localhost:5173/cancel?status=cancel",
-      customer_email: req.user?.email || undefined, // email del cliente
+      success_url: "https://ecomerce-frontend-mauro.vercel.app/success?status=success&session_id={CHECKOUT_SESSION_ID}",
+      cancel_url: "https://ecomerce-frontend-mauro.vercel.app/cancel?status=cancel",
+      customer_email: req.user?.email || undefined,
       metadata: {
-        userId: req.userId, 
-        items: JSON.stringify(items) 
-      }
+        userId: req.userId,
+        items: JSON.stringify(items),
+      },
     });
 
     res.json({ url: session.url });
@@ -108,6 +108,7 @@ exports.pago = async (req, res) => {
     res.status(500).json({ error: "Error al crear sesión de Stripe" });
   }
 };
+
 
 exports.obtenerRecibo = async (req, res) => {
   try {
