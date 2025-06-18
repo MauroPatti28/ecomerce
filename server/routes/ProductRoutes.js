@@ -14,7 +14,6 @@ router.get("/",productController.get);
 router.put("/editar/:id", authMiddleware ,upload.single("imagen"), productController.put); // ✅ Agregá multer acá también
 router.delete("/:id", authMiddleware, productController.delete);
 
-module.exports = router;
 
 router.post("/",upload.single('imagen'),productController.Post)
 router.get("/:id",productController.getById)
