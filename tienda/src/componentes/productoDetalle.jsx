@@ -42,7 +42,7 @@ function ProductoDetalle({ productos = [], agregarAlCarrito }) {
             
             try {
                 setLoading(true);
-                const response = await fetch(`http://localhost:3000/productos/${id}/resenas`);
+                const response = await fetch(`https://ecomerce-production-c031.up.railway.app/productos/${id}/resenas`);
                 if (!response.ok) {
                     throw new Error("Error al obtener las reseñas");
                 }
@@ -89,7 +89,7 @@ function ProductoDetalle({ productos = [], agregarAlCarrito }) {
 
         setEnviandoResena(true);
         try {
-            const response = await fetch(`http://localhost:3000/productos/${id}/resenas`, {
+            const response = await fetch(`https://ecomerce-production-c031.up.railway.app/productos/${id}/resenas`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -223,7 +223,7 @@ function ProductoDetalle({ productos = [], agregarAlCarrito }) {
             <div className="space-y-4">
                 <div className="relative aspect-square rounded-xl overflow-hidden bg-gray-100">
                     <img 
-                        src={imagenActual === 'placeholder' ? imagenPlaceholder : `http://localhost:3000/uploads/${imagenActual}`}
+                        src={imagenActual === 'placeholder' ? imagenPlaceholder : `https://ecomerce-production-c031.up.railway.app/uploads/${imagenActual}`}
                         alt={producto.nombre}
                         className="w-full h-full object-cover"
                         onError={(e) => {
@@ -274,7 +274,7 @@ function ProductoDetalle({ productos = [], agregarAlCarrito }) {
                                 }`}
                             >
                                 <img 
-                                    src={`http://localhost:3000/uploads/${imagen}`}
+                                    src={`https://ecomerce-production-c031.up.railway.app/uploads/${imagen}`}
                                     alt={`Vista ${index + 1}`}
                                     className="w-full h-full object-cover"
                                     onError={(e) => {

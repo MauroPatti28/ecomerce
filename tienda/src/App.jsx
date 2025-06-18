@@ -35,7 +35,7 @@ function App() {
         const fetchProductos = async () => {
             try {
                 const token = localStorage.getItem("token"); 
-                const response = await fetch("http://localhost:3000/productos", {
+                const response = await fetch("https://ecomerce-production-c031.up.railway.app/productos", {
                     method: "GET",
                     headers: {
                         ...(token && { Authorization: `Bearer ${token}` }), 
