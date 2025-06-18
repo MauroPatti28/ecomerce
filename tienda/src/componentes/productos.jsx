@@ -25,7 +25,7 @@ function Productos({ isAuthenticated, rol }) {
                     headers.Authorization = `Bearer ${token}`;
                 }
                 
-                const response = await fetch("http://localhost:3000/productos", {
+                const response = await fetch("https://ecomerce-production-c031.up.railway.app/productos", {
                     method: "GET",
                     headers: headers,
                 });
@@ -140,7 +140,7 @@ function Productos({ isAuthenticated, rol }) {
                                     {/* Imagen del producto */}
                                     <div className="relative aspect-square overflow-hidden bg-gray-50">
                                         <img 
-                                            src={`http://localhost:3000/uploads/${producto.imagen}`} 
+                                            src={`https://ecomerce-production-c031.up.railway.app/uploads/${producto.imagen}`} 
                                             alt={producto.nombre}
                                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                             onError={(e) => {
