@@ -20,7 +20,7 @@ server.post("/webhook", bodyParser.raw({ type: "application/json" }), stripeWebh
 
 // Luego los demás middlewares
 server.use(cors({
-  origin: ['https://tudominio-vercel.app'],
+  origin: ['https://ecomerce-production-c031.up.railway.app/'],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
