@@ -1,37 +1,43 @@
-// Código simplificado sin perder funcionalidad
 import React, { useState, useEffect } from 'react';
 import {
   ArrowLeft, ChevronLeft, ChevronRight, Heart, Loader2,
-  MessageCircle, Send, Share2, ShoppingCart, AlertCircle, User
+  MessageCircle, Send, Share2, ShoppingCart, AlertCircle
 } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 
-function ProductoDetalle({ productos = [], agregarAlCarrito }) {
+function ProductoDetalle({ agregarAlCarrito }) {
   const { id } = useParams();
+  const [producto, setProducto] = useState(null);
   const [resenas, setResenas] = useState([]);
   const [nuevaResena, setNuevaResena] = useState("");
   const [currentResenaIndex, setCurrentResenaIndex] = useState(0);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [loadingProducto, setLoadingProducto] = useState(true);
+  const [loadingResenas, setLoadingResenas] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [cantidad, setCantidad] = useState(1);
   const [favorito, setFavorito] = useState(false);
 
-  const producto = productos.find((p) => p._id === id);
   const imagenPlaceholder = "data:image/svg+xml,%3Csvg...%3C/svg%3E";
-
-  const imagenes = producto?.imagenes?.filter(Boolean) ||
-    (producto?.imagen ? [producto.imagen] : ['placeholder']);
-  const imagenActual = imagenes[currentImageIndex];
 
   useEffect(() => {
     if (!id) return;
-    setLoading(true);
+    setLoadingProducto(true);
+    fetch(`https://ecomerce-production-c031.up.railway.app/productos/${id}`)
+      .then(res => res.ok ? res.json() : Promise.reject("No encontrado"))
+      .then(data => setProducto(data))
+      .catch(() => setProducto(null))
+      .finally(() => setLoadingProducto(false));
+  }, [id]);
+
+  useEffect(() => {
+    if (!id) return;
+    setLoadingResenas(true);
     fetch(`https://ecomerce-production-c031.up.railway.app/productos/${id}/resenas`)
       .then(res => res.ok ? res.json() : Promise.reject("Error"))
       .then(data => setResenas(Array.isArray(data.resenas) ? data.resenas : []))
       .catch(() => setResenas([]))
-      .finally(() => setLoading(false));
+      .finally(() => setLoadingResenas(false));
   }, [id]);
 
   useEffect(() => {
@@ -48,7 +54,8 @@ function ProductoDetalle({ productos = [], agregarAlCarrito }) {
     setEnviando(true);
     try {
       const res = await fetch(`https://ecomerce-production-c031.up.railway.app/productos/${id}/resenas`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ productoId: id, texto: nuevaResena })
       });
       if (!res.ok) throw new Error();
@@ -64,22 +71,39 @@ function ProductoDetalle({ productos = [], agregarAlCarrito }) {
 
   const goBack = () => window.history.back();
   const cambiarImagen = dir => setCurrentImageIndex(i => (i + dir + imagenes.length) % imagenes.length);
-  const agregar = () => agregarAlCarrito && producto && agregarAlCarrito({
-    ...producto,
-    precio: parseFloat(producto.precio),
-    cantidad,
-    precioTotal: parseFloat(producto.precio) * cantidad
-  });
+  const agregar = () => {
+    if (!producto) return;
+    agregarAlCarrito && agregarAlCarrito({
+      ...producto,
+      precio: parseFloat(producto.precio),
+      cantidad,
+      precioTotal: parseFloat(producto.precio) * cantidad
+    });
+  };
 
-  if (!producto) return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="text-center">
-        <AlertCircle className="mx-auto text-red-500 w-8 h-8" />
-        <h2>Producto no encontrado</h2>
-        <button onClick={goBack} className="btn">Volver</button>
+  if (loadingProducto) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="animate-spin w-6 h-6 text-gray-600" />
       </div>
-    </div>
-  );
+    );
+  }
+
+  if (!producto) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <AlertCircle className="mx-auto text-red-500 w-8 h-8" />
+          <h2>Producto no encontrado</h2>
+          <button onClick={goBack} className="btn mt-4">Volver</button>
+        </div>
+      </div>
+    );
+  }
+
+  const imagenes = producto?.imagenes?.filter(Boolean) ||
+    (producto?.imagen ? [producto.imagen] : ['placeholder']);
+  const imagenActual = imagenes[currentImageIndex];
 
   return (
     <div className="p-4 max-w-6xl mx-auto">
@@ -158,7 +182,7 @@ function ProductoDetalle({ productos = [], agregarAlCarrito }) {
 
         <div>
           <h2 className="font-bold text-xl mb-2">Reseñas ({resenas.length})</h2>
-          {loading ? <Loader2 className="animate-spin" /> : resenas.length ? (
+          {loadingResenas ? <Loader2 className="animate-spin" /> : resenas.length ? (
             <div className="border rounded p-4">
               <p className="font-semibold mb-1">{resenas[currentResenaIndex].usuario || 'Anónimo'}</p>
               <p>{resenas[currentResenaIndex].texto}</p>
