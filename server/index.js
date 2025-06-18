@@ -19,11 +19,7 @@ const server = express();
 server.post("/webhook", bodyParser.raw({ type: "application/json" }), stripeWebhook);
 
 // Luego los demás middlewares
-server.use(cors({
-  origin: ['https://ecomerce-production-c031.up.railway.app/'],
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+server.use(cors());
 server.use(express.json());
 server.use("/uploads", express.static("uploads"));
 server.use("/usuarios", userRoutes);
