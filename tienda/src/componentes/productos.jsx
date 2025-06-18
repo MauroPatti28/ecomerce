@@ -1,12 +1,13 @@
 import React from 'react';
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ShoppingBag, Eye, AlertCircle, Loader2, LogIn } from "lucide-react";
+import { ShoppingBag, Eye, AlertCircle, Loader2, LogIn, ImageOff } from "lucide-react";
 
 function Productos({ isAuthenticated, rol }) {
     const [productos, setProductos] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [imageErrors, setImageErrors] = useState(new Set());
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -35,6 +36,9 @@ function Productos({ isAuthenticated, rol }) {
                 }
                 const data = await response.json();
                 setProductos(data);
+                
+                // Limpiar errores de imagen anteriores
+                setImageErrors(new Set());
             } catch (error) {
                 console.error("Error al obtener los productos:", error);
                 setError(error.message);
@@ -53,6 +57,64 @@ function Productos({ isAuthenticated, rol }) {
 
     const handleLoginRedirect = () => {
         navigate('/login');
+    };
+
+    // Función mejorada para manejar errores de imagen
+    const handleImageError = (productId) => {
+        setImageErrors(prev => new Set([...prev, productId]));
+    };
+
+    // Función para recargar imagen
+    const handleImageRetry = (productId) => {
+        setImageErrors(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(productId);
+            return newSet;
+        });
+    };
+
+    // Componente para imagen del producto
+    const ProductImage = ({ producto }) => {
+        const hasError = imageErrors.has(producto._id);
+        const [imageLoading, setImageLoading] = useState(true);
+
+        if (hasError) {
+            return (
+                <div className="w-full h-full flex flex-col items-center justify-center bg-gray-100">
+                    <ImageOff className="w-12 h-12 text-gray-400 mb-2" />
+                    <p className="text-gray-500 text-sm mb-2">Error al cargar imagen</p>
+                    <button
+                        onClick={() => handleImageRetry(producto._id)}
+                        className="text-blue-600 hover:text-blue-700 text-xs underline"
+                    >
+                        Reintentar
+                    </button>
+                </div>
+            );
+        }
+
+        return (
+            <div className="relative w-full h-full">
+                {imageLoading && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+                        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+                    </div>
+                )}
+                <img 
+                    src={`https://ecomerce-production-c031.up.railway.app/uploads/${producto.imagen}`}
+                    alt={producto.nombre}
+                    className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 ${
+                        imageLoading ? 'opacity-0' : 'opacity-100'
+                    }`}
+                    onLoad={() => setImageLoading(false)}
+                    onError={() => {
+                        setImageLoading(false);
+                        handleImageError(producto._id);
+                    }}
+                    loading="lazy" // Carga lazy para mejor performance
+                />
+            </div>
+        );
     };
 
     // Estado de carga
@@ -139,14 +201,7 @@ function Productos({ isAuthenticated, rol }) {
                                 >
                                     {/* Imagen del producto */}
                                     <div className="relative aspect-square overflow-hidden bg-gray-50">
-                                        <img 
-                                            src={`https://ecomerce-production-c031.up.railway.app/uploads/${producto.imagen}`} 
-                                            alt={producto.nombre}
-                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                            onError={(e) => {
-                                                e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDQwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xNzUgMTUwSDE1MFYxMjVIMTc1VjE1MFpNMjI1IDE1MEgyMDBWMTI1SDIyNVYxNTBaTTI3NSAxNTBIMjUwVjEyNUgyNzVWMTUwWk0xNzUgMjAwSDE1MFYxNzVIMTc1VjIwMFpNMjI1IDIwMEgyMDBWMTc1SDIyNVYyMDBaTTI3NSAyMDBIMjUwVjE3NUgyNzVWMjAwWk0xNzUgMjUwSDE1MFYyMjVIMTc1VjI1MFpNMjI1IDI1MEgyMDBWMjI1SDIyNVYyNTBaTTI3NSAyNTBIMjUwVjIyNUgyNzVWMjUwWiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K';
-                                            }}
-                                        />
+                                        <ProductImage producto={producto} />
                                         
                                         {/* Overlay en hover */}
                                         <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
