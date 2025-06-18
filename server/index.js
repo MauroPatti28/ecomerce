@@ -19,7 +19,7 @@ const server = express();
 server.post("/webhook", bodyParser.raw({ type: "application/json" }), stripeWebhook);
 
 // Luego los demás middlewares
-app.use(cors({
+server.use(cors({
   origin: ['https://tudominio-vercel.app'],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']

@@ -13,11 +13,11 @@ import {
     MessageCircle,
     User
 } from 'lucide-react';
+import { useParams } from 'react-router-dom'; // Importamos useParams
 
 function ProductoDetalle({ productos = [], agregarAlCarrito }) {
-    // Simulamos useParams para el demo - en tu app real descomenta la línea de abajo
-    // const { id } = useParams();
-    const id = productos.length > 0 ? productos[0]._id : null; // FIX: Mejor validación
+    // Obtenemos el id real de la URL
+    const { id } = useParams();
     
     const [resenas, setResenas] = useState([]);
     const [nuevaResena, setNuevaResena] = useState("");
@@ -47,7 +47,7 @@ function ProductoDetalle({ productos = [], agregarAlCarrito }) {
                     throw new Error("Error al obtener las reseñas");
                 }
                 const data = await response.json();
-                setResenas(Array.isArray(data.resenas) ? data.resenas : []); // FIX: Asegurar que sea array
+                setResenas(Array.isArray(data.resenas) ? data.resenas : []);
                 setError(null);
             } catch (error) {
                 console.error("Error al obtener las reseñas:", error);
@@ -73,7 +73,7 @@ function ProductoDetalle({ productos = [], agregarAlCarrito }) {
         }
     }, [resenas]);
 
-    // Buscar el producto actual
+    // Buscar el producto por el ID de la URL
     const producto = productos.find((producto) => producto._id === id);
 
     const enviarResena = async () => {
@@ -113,16 +113,16 @@ function ProductoDetalle({ productos = [], agregarAlCarrito }) {
         }
     };
 
-   const handleAgregarCarrito = () => {
-    if (agregarAlCarrito && producto) {
-        agregarAlCarrito({ 
-            ...producto, 
-            precio: parseFloat(producto.precio), // Precio unitario
-            cantidad,
-            precioTotal: parseFloat(producto.precio) * cantidad // Precio total
-        });
-    }
-};
+    const handleAgregarCarrito = () => {
+        if (agregarAlCarrito && producto) {
+            agregarAlCarrito({ 
+                ...producto, 
+                precio: parseFloat(producto.precio),
+                cantidad,
+                precioTotal: parseFloat(producto.precio) * cantidad
+            });
+        }
+    };
 
     const nextImage = () => {
         if (producto?.imagenes && producto.imagenes.length > 1) {
@@ -144,10 +144,8 @@ function ProductoDetalle({ productos = [], agregarAlCarrito }) {
         window.history.back();
     };
 
-    // FIX: Imagen placeholder más simple y confiable
     const imagenPlaceholder = "data:image/svg+xml,%3Csvg width='400' height='400' viewBox='0 0 400 400' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='400' height='400' fill='%23F3F4F6'/%3E%3Ctext x='200' y='200' text-anchor='middle' fill='%239CA3AF' font-family='Arial' font-size='16'%3EImagen no disponible%3C/text%3E%3C/svg%3E";
 
-    // Estados de carga y error
     if (!productos || productos.length === 0) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -180,20 +178,18 @@ function ProductoDetalle({ productos = [], agregarAlCarrito }) {
         );
     }
 
-    // FIX: Mejor manejo de imágenes con validación
     const prepararImagenes = () => {
         if (producto.imagenes && Array.isArray(producto.imagenes) && producto.imagenes.length > 0) {
-            return producto.imagenes.filter(img => img && img.trim() !== ''); // Filtrar imágenes vacías
+            return producto.imagenes.filter(img => img && img.trim() !== '');
         } else if (producto.imagen && producto.imagen.trim() !== '') {
             return [producto.imagen];
         }
-        return ['placeholder']; // Usar placeholder si no hay imágenes
+        return ['placeholder'];
     };
 
     const imagenes = prepararImagenes();
     const imagenActual = imagenes[currentImageIndex];
 
-    // FIX: Resetear currentImageIndex si es mayor que el número de imágenes
     useEffect(() => {
         if (currentImageIndex >= imagenes.length) {
             setCurrentImageIndex(0);
@@ -202,7 +198,6 @@ function ProductoDetalle({ productos = [], agregarAlCarrito }) {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            {/* Breadcrumb */}
             <div className="bg-white shadow-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                     <div className="flex items-center space-x-2 text-sm text-gray-500">
@@ -215,158 +210,148 @@ function ProductoDetalle({ productos = [], agregarAlCarrito }) {
                     </div>
                 </div>
             </div>
-<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    {/* Producto Principal */}
-    <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-8">
-            {/* Gallery de Imágenes */}
-            <div className="space-y-4">
-                <div className="relative aspect-square rounded-xl overflow-hidden bg-gray-100">
-                    <img 
-                        src={imagenActual === 'placeholder' ? imagenPlaceholder : `https://ecomerce-production-c031.up.railway.app/uploads/${imagenActual}`}
-                        alt={producto.nombre}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                            e.target.src = imagenPlaceholder;
-                        }}
-                    />
-                    
-                    {imagenes.length > 1 && imagenes[0] !== 'placeholder' && (
-                        <>
-                            <button
-                                onClick={prevImage}
-                                className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm p-2 rounded-full shadow-lg hover:bg-white transition-colors"
-                            >
-                                <ChevronLeft className="w-5 h-5" />
-                            </button>
-                            <button
-                                onClick={nextImage}
-                                className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm p-2 rounded-full shadow-lg hover:bg-white transition-colors"
-                            >
-                                <ChevronRight className="w-5 h-5" />
-                            </button>
-
-                            {/* Indicadores */}
-                            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
-                                {imagenes.map((_, index) => (
-                                    <button
-                                        key={index}
-                                        onClick={() => setCurrentImageIndex(index)}
-                                        className={`w-2 h-2 rounded-full transition-colors ${
-                                            index === currentImageIndex ? 'bg-white' : 'bg-white/50'
-                                        }`}
-                                    />
-                                ))}
-                            </div>
-                        </>
-                    )}
-                </div>
-
-                {/* Thumbnails */}
-                {imagenes.length > 1 && imagenes[0] !== 'placeholder' && (
-                    <div className="flex space-x-4 overflow-x-auto pb-2">
-                        {imagenes.map((imagen, index) => (
-                            <button
-                                key={index}
-                                onClick={() => setCurrentImageIndex(index)}
-                                className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-colors ${
-                                    index === currentImageIndex ? 'border-blue-500' : 'border-gray-200'
-                                }`}
-                            >
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-8">
+                        <div className="space-y-4">
+                            <div className="relative aspect-square rounded-xl overflow-hidden bg-gray-100">
                                 <img 
-                                    src={`https://ecomerce-production-c031.up.railway.app/uploads/${imagen}`}
-                                    alt={`Vista ${index + 1}`}
+                                    src={imagenActual === 'placeholder' ? imagenPlaceholder : `https://ecomerce-production-c031.up.railway.app/uploads/${imagenActual}`}
+                                    alt={producto.nombre}
                                     className="w-full h-full object-cover"
                                     onError={(e) => {
                                         e.target.src = imagenPlaceholder;
                                     }}
                                 />
-                            </button>
-                        ))}
+                                
+                                {imagenes.length > 1 && imagenes[0] !== 'placeholder' && (
+                                    <>
+                                        <button
+                                            onClick={prevImage}
+                                            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm p-2 rounded-full shadow-lg hover:bg-white transition-colors"
+                                        >
+                                            <ChevronLeft className="w-5 h-5" />
+                                        </button>
+                                        <button
+                                            onClick={nextImage}
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm p-2 rounded-full shadow-lg hover:bg-white transition-colors"
+                                        >
+                                            <ChevronRight className="w-5 h-5" />
+                                        </button>
+
+                                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
+                                            {imagenes.map((_, index) => (
+                                                <button
+                                                    key={index}
+                                                    onClick={() => setCurrentImageIndex(index)}
+                                                    className={`w-2 h-2 rounded-full transition-colors ${
+                                                        index === currentImageIndex ? 'bg-white' : 'bg-white/50'
+                                                    }`}
+                                                />
+                                            ))}
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+
+                            {imagenes.length > 1 && imagenes[0] !== 'placeholder' && (
+                                <div className="flex space-x-4 overflow-x-auto pb-2">
+                                    {imagenes.map((imagen, index) => (
+                                        <button
+                                            key={index}
+                                            onClick={() => setCurrentImageIndex(index)}
+                                            className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-colors ${
+                                                index === currentImageIndex ? 'border-blue-500' : 'border-gray-200'
+                                            }`}
+                                        >
+                                            <img 
+                                                src={`https://ecomerce-production-c031.up.railway.app/uploads/${imagen}`}
+                                                alt={`Vista ${index + 1}`}
+                                                className="w-full h-full object-cover"
+                                                onError={(e) => {
+                                                    e.target.src = imagenPlaceholder;
+                                                }}
+                                            />
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="space-y-6">
+                            <div>
+                                <h1 className="text-3xl font-bold text-gray-900 mb-4">{producto.nombre}</h1>
+                                
+                                <p className="text-4xl font-bold text-blue-600 mb-4">
+                                    ${producto.precio ? (producto.precio * cantidad).toLocaleString('es-ES', {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2
+                                    }) : 'Precio no disponible'}
+                                    {cantidad > 1 && (
+                                        <span className="text-sm text-gray-500 ml-2">
+                                            (${producto.precio.toLocaleString('es-ES', {
+                                                minimumFractionDigits: 2,
+                                                maximumFractionDigits: 2
+                                            })} c/u)
+                                        </span>
+                                    )}
+                                </p>
+
+                                <p className="text-gray-700 leading-relaxed mb-6">
+                                    {producto.descripcion || 'Descripción no disponible'}
+                                </p>
+                            </div>
+
+                            <div className="flex items-center space-x-4">
+                                <span className="text-gray-700">Cantidad:</span>
+                                <div className="flex items-center border border-gray-300 rounded-lg">
+                                    <button
+                                        onClick={() => setCantidad(Math.max(1, cantidad - 1))}
+                                        className="px-3 py-2 hover:bg-gray-100 transition-colors"
+                                    >
+                                        -
+                                    </button>
+                                    <span className="px-4 py-2 border-x border-gray-300">{cantidad}</span>
+                                    <button
+                                        onClick={() => setCantidad(cantidad + 1)}
+                                        className="px-3 py-2 hover:bg-gray-100 transition-colors"
+                                    >
+                                        +
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="space-y-4">
+                                <button
+                                    onClick={handleAgregarCarrito}
+                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl transition-colors duration-200 flex items-center justify-center space-x-3"
+                                >
+                                    <ShoppingCart className="w-5 h-5" />
+                                    <span>Agregar al Carrito</span>
+                                </button>
+
+                                <div className="flex space-x-4">
+                                    <button
+                                        onClick={() => setIsFavorito(!isFavorito)}
+                                        className={`flex-1 border-2 border-gray-300 hover:border-red-400 py-3 px-4 rounded-xl transition-colors duration-200 flex items-center justify-center space-x-2 ${
+                                            isFavorito ? 'border-red-400 text-red-500' : 'text-gray-700'
+                                        }`}
+                                    >
+                                        <Heart className={`w-5 h-5 ${isFavorito ? 'fill-current' : ''}`} />
+                                        <span>Favoritos</span>
+                                    </button>
+                                    
+                                    <button className="flex-1 border-2 border-gray-300 hover:border-blue-400 text-gray-700 hover:text-blue-600 py-3 px-4 rounded-xl transition-colors duration-200 flex items-center justify-center space-x-2">
+                                        <Share2 className="w-5 h-5" />
+                                        <span>Compartir</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                )}
-            </div>
-
-            {/* Información del Producto */}
-            <div className="space-y-6">
-                <div>
-                    <h1 className="text-3xl font-bold text-gray-900 mb-4">{producto.nombre}</h1>
-                    
-                    {/* PRECIO CORREGIDO - MOSTRAR TOTAL Y UNITARIO */}
-                    <p className="text-4xl font-bold text-blue-600 mb-4">
-                        ${producto.precio ? (producto.precio * cantidad).toLocaleString('es-ES', {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2
-                        }) : 'Precio no disponible'}
-                        {cantidad > 1 && (
-                            <span className="text-sm text-gray-500 ml-2">
-                                (${producto.precio.toLocaleString('es-ES', {
-                                    minimumFractionDigits: 2,
-                                    maximumFractionDigits: 2
-                                })} c/u)
-                            </span>
-                        )}
-                    </p>
-
-                    <p className="text-gray-700 leading-relaxed mb-6">
-                        {producto.descripcion || 'Descripción no disponible'}
-                    </p>
                 </div>
 
-                {/* Cantidad */}
-                <div className="flex items-center space-x-4">
-                    <span className="text-gray-700">Cantidad:</span>
-                    <div className="flex items-center border border-gray-300 rounded-lg">
-                        <button
-                            onClick={() => setCantidad(Math.max(1, cantidad - 1))}
-                            className="px-3 py-2 hover:bg-gray-100 transition-colors"
-                        >
-                            -
-                        </button>
-                        <span className="px-4 py-2 border-x border-gray-300">{cantidad}</span>
-                        <button
-                            onClick={() => setCantidad(cantidad + 1)}
-                            className="px-3 py-2 hover:bg-gray-100 transition-colors"
-                        >
-                            +
-                        </button>
-                    </div>
-                </div>
-
-                {/* Botones de Acción */}
-                <div className="space-y-4">
-                    <button
-                        onClick={handleAgregarCarrito}
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl transition-colors duration-200 flex items-center justify-center space-x-3"
-                    >
-                        <ShoppingCart className="w-5 h-5" />
-                        <span>Agregar al Carrito</span>
-                    </button>
-
-                    <div className="flex space-x-4">
-                        <button
-                            onClick={() => setIsFavorito(!isFavorito)}
-                            className={`flex-1 border-2 border-gray-300 hover:border-red-400 py-3 px-4 rounded-xl transition-colors duration-200 flex items-center justify-center space-x-2 ${
-                                isFavorito ? 'border-red-400 text-red-500' : 'text-gray-700'
-                            }`}
-                        >
-                            <Heart className={`w-5 h-5 ${isFavorito ? 'fill-current' : ''}`} />
-                            <span>Favoritos</span>
-                        </button>
-                        
-                        <button className="flex-1 border-2 border-gray-300 hover:border-blue-400 text-gray-700 hover:text-blue-600 py-3 px-4 rounded-xl transition-colors duration-200 flex items-center justify-center space-x-2">
-                            <Share2 className="w-5 h-5" />
-                            <span>Compartir</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-                {/* Sección de Reseñas */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    {/* Formulario de Reseña */}
                     <div className="bg-white rounded-2xl shadow-lg p-8">
                         <div className="flex items-center space-x-3 mb-6">
                             <MessageCircle className="w-6 h-6 text-blue-600" />
@@ -402,7 +387,6 @@ function ProductoDetalle({ productos = [], agregarAlCarrito }) {
                         </div>
                     </div>
 
-                    {/* Carrusel de Reseñas */}
                     <div className="bg-white rounded-2xl shadow-lg p-8">
                         <div className="flex items-center justify-between mb-6">
                             <h3 className="text-2xl font-bold text-gray-900">Reseñas de Clientes</h3>
@@ -420,7 +404,6 @@ function ProductoDetalle({ productos = [], agregarAlCarrito }) {
                                         <div className="flex items-center space-x-2 mb-4">
                                             <User className="w-5 h-5 text-gray-400" />
                                             <span className="font-semibold text-gray-800">
-                                                {/* FIX: Mejor validación para reseñas */}
                                                 {resenas[currentIndex]?.usuario || "Usuario Anónimo"}
                                             </span>
                                         </div>
@@ -430,7 +413,6 @@ function ProductoDetalle({ productos = [], agregarAlCarrito }) {
                                     </div>
                                 </div>
 
-                                {/* Navegación del carrusel */}
                                 {resenas.length > 1 && (
                                     <div className="flex items-center justify-between mt-4">
                                         <button
