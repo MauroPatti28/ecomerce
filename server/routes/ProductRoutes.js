@@ -23,4 +23,4 @@ router.put("/editar/:id",productController.put)
 router.delete("/:id",productController.delete)
 router.get("/:productoId/resenas", resenasController.obtenerResenas);
 router.post("/:productoId/resenas", resenasController.crearResena);
-module.exports = router
+module.exports = router   
