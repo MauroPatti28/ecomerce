@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 function Inicio() {
     const [currentIndex, setCurrentIndex] = useState(0); 
     const [isTransitioning, setIsTransitioning] = useState(true);
     const [isVisible, setIsVisible] = useState({});
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+    const [showAdminAlert, setShowAdminAlert] = useState(true);
 
-    const navigate = useNavigate();
+    const handleNavigation = (path) => {
+        console.log(`Navegando a: ${path}`);
+        // Aquí iría la lógica de navegación con React Router
+    };
 
     // Hero slides con contenido dinámico
     const heroSlides = [
@@ -152,6 +155,30 @@ function Inicio() {
 
     return (
         <div className="min-h-screen bg-black text-white overflow-hidden">
+            {/* Admin Alert */}
+            {showAdminAlert && (
+                <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white p-4 shadow-2xl animate-pulse">
+                    <div className="max-w-7xl mx-auto flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                            <div className="text-2xl">🛡️</div>
+                            <div>
+                                <div className="font-bold text-lg">Admin por defecto creado</div>
+                                <div className="text-sm opacity-90">
+                                    📧 Email: admin@tienda.com | 🔑 Password: admin123 | 
+                                    <span className="ml-2 font-semibold">⚠️ Para agregar productos, inicia sesión como administrador</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button 
+                            onClick={() => setShowAdminAlert(false)}
+                            className="text-white hover:text-gray-200 text-2xl font-bold p-2 hover:bg-white/20 rounded-full transition-all duration-300"
+                        >
+                            ✕
+                        </button>
+                    </div>
+                </div>
+            )}
+
             {/* Floating Particles Background */}
             <div className="fixed inset-0 pointer-events-none z-0">
                 {[...Array(20)].map((_, i) => (
@@ -169,7 +196,7 @@ function Inicio() {
             </div>
 
             {/* Hero Section con Carousel Avanzado */}
-            <section className="relative h-screen overflow-hidden">
+            <section className={`relative h-screen overflow-hidden ${showAdminAlert ? 'pt-20' : ''}`}>
                 <div
                     className="flex h-full transition-all duration-700 ease-out"
                     style={{
@@ -421,14 +448,14 @@ function Inicio() {
                     
                     <div className="flex flex-col sm:flex-row gap-6 justify-center mb-12">
                         <button 
-                            onClick={() => navigate('/registro')}
+                            onClick={() => handleNavigation('/registro')}
                             className="group relative overflow-hidden bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-12 py-6 rounded-2xl font-black text-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
                         >
                             <span className="relative z-10">COMENZAR AHORA</span>
                             <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-red-500 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></div>
                         </button>
                         <button 
-                            onClick={() => navigate('/productos')}
+                            onClick={() => handleNavigation('/productos')}
                             className="border-2 border-white text-white px-12 py-6 rounded-2xl font-black text-xl hover:bg-white hover:text-black transform hover:scale-105 transition-all duration-300"
                         >
                             EXPLORAR CATÁLOGO
