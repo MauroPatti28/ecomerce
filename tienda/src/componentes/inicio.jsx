@@ -155,26 +155,59 @@ function Inicio() {
 
     return (
         <div className="min-h-screen bg-black text-white overflow-hidden">
-            {/* Admin Alert */}
+            <style jsx>{`
+                @keyframes slide-in-right {
+                    from {
+                        transform: translateX(100%);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                }
+                .animate-slide-in-right {
+                    animation: slide-in-right 0.5s ease-out;
+                }
+            `}</style>
+            {/* Admin Alert - Toast Style */}
             {showAdminAlert && (
-                <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white p-4 shadow-2xl animate-pulse">
-                    <div className="max-w-7xl mx-auto flex items-center justify-between">
-                        <div className="flex items-center space-x-4">
-                            <div className="text-2xl">🛡️</div>
-                            <div>
-                                <div className="font-bold text-lg">Admin por defecto creado</div>
-                                <div className="text-sm opacity-90">
-                                    📧 Email: admin@tienda.com | 🔑 Password: admin123 | 
-                                    <span className="ml-2 font-semibold">⚠️ Para agregar productos, inicia sesión como administrador</span>
+                <div className="fixed top-6 right-6 z-50 max-w-md bg-gradient-to-br from-slate-800 to-slate-900 border border-blue-500/30 rounded-2xl p-6 shadow-2xl backdrop-blur-md animate-slide-in-right">
+                    <div className="flex items-start space-x-4">
+                        <div className="flex-shrink-0">
+                            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-xl animate-pulse">
+                                🛡️
+                            </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between mb-2">
+                                <h3 className="text-lg font-bold text-white">Admin Configurado</h3>
+                                <button 
+                                    onClick={() => setShowAdminAlert(false)}
+                                    className="text-gray-400 hover:text-white text-xl p-1 hover:bg-white/10 rounded-full transition-all duration-300"
+                                >
+                                    ✕
+                                </button>
+                            </div>
+                            <div className="space-y-2 text-sm">
+                                <div className="flex items-center space-x-2 text-gray-300">
+                                    <span className="text-blue-400">📧</span>
+                                    <span className="font-mono bg-gray-800 px-2 py-1 rounded text-xs">admin@tienda.com</span>
+                                </div>
+                                <div className="flex items-center space-x-2 text-gray-300">
+                                    <span className="text-green-400">🔑</span>
+                                    <span className="font-mono bg-gray-800 px-2 py-1 rounded text-xs">admin123</span>
+                                </div>
+                                <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 mt-3">
+                                    <div className="flex items-center space-x-2">
+                                        <span className="text-yellow-400">⚠️</span>
+                                        <span className="text-yellow-200 text-xs font-medium">
+                                            Inicia sesión como admin para agregar productos
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <button 
-                            onClick={() => setShowAdminAlert(false)}
-                            className="text-white hover:text-gray-200 text-2xl font-bold p-2 hover:bg-white/20 rounded-full transition-all duration-300"
-                        >
-                            ✕
-                        </button>
                     </div>
                 </div>
             )}
@@ -196,7 +229,7 @@ function Inicio() {
             </div>
 
             {/* Hero Section con Carousel Avanzado */}
-            <section className={`relative h-screen overflow-hidden ${showAdminAlert ? 'pt-20' : ''}`}>
+            <section className="relative h-screen overflow-hidden">
                 <div
                     className="flex h-full transition-all duration-700 ease-out"
                     style={{
